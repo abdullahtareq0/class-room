@@ -1,67 +1,125 @@
-// Dashboard (foundation — friend's features 3-6): teacher lists/creates classes,
-// student lists joined classes + joins by code.
+// Dashboard (اتجاه ٣): شريط جانبي + بانر ترحيبي + بطاقات دورات بأغلفة.
 import { signOut } from '../js/auth.js';
-import { t } from '../js/i18n.js';
-import { mount, topbar, wireTopbar, toast, esc, initial } from '../js/ui.js';
+import { t, toggleTheme, toggleLang, getTheme, getLang } from '../js/i18n.js';
+import { mount, toast, esc, initial, confirmDialog } from '../js/ui.js';
 import { reroute, go } from '../js/router.js';
-import { createClassroom, listForTeacher, listForStudent, joinByCode } from '../js/classrooms.js';
+import { createClassroom, listForTeacher, listForStudent, joinByCode, deleteClassroom } from '../js/classrooms.js';
+
+const LOGO = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10 12 5 2 10l10 5 10-5Z"/><path d="M6 12v5c0 1 2.7 2.5 6 2.5s6-1.5 6-2.5v-5"/><path d="M22 10v5"/></svg>`;
+const I_HOME = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/></svg>`;
 
 export async function renderDashboard(profile) {
   const l = t();
   const isTeacher = profile.role === 'teacher';
+  const first = (profile.full_name || '').split(' ')[0] || '';
 
   let classes = [];
   try {
     classes = isTeacher ? await listForTeacher(profile.id) : await listForStudent(profile.id);
   } catch (e) { toast(l.error, true); }
 
-  const right = `
-    <span class="pill">${esc(isTeacher ? l.roleTeacher : l.roleStudent)}</span>
-    <div class="avatar sm">${esc(initial(profile.full_name))}</div>
-    <button class="btn ghost sm" id="out">${esc(l.signOut)}</button>`;
+  const totalMembers = classes.reduce((s, c) => s + (c.classroom_members?.[0]?.count ?? 0), 0);
 
   const cards = classes.map((c) => {
     const m = c.classroom_members?.[0]?.count ?? 0;
     const tk = c.tasks?.[0]?.count ?? 0;
     return `
-      <div class="card class-card" data-id="${c.id}">
-        <div class="spread">
-          <h3>${esc(c.name)}</h3>
-          <span class="pill code">${esc(c.classroom_code)}</span>
+      <div class="ccard" data-id="${c.id}">
+        <div class="cover">
+          <span class="wm">${esc(initial(c.name))}</span>
+          <span class="code">${esc(c.classroom_code)}</span>
+          ${isTeacher ? `<button class="del" data-del="${c.id}" title="${esc(l.deleteClass)}">🗑</button>` : ''}
         </div>
-        <p class="muted small">${esc(c.description || '')}</p>
-        <div class="class-meta">
-          <span>👥 ${m} ${esc(l.members)}</span>
-          <span>📋 ${tk} ${esc(l.tasks)}</span>
+        <div class="b">
+          <h3>${esc(c.name)}</h3>
+          ${c.description ? `<p>${esc(c.description)}</p>` : ''}
+          <div class="meta">
+            <span>👥 ${m} ${esc(l.members)}</span>
+            <span>📋 ${tk} ${esc(l.tasks)}</span>
+          </div>
         </div>
       </div>`;
   }).join('');
 
-  const action = isTeacher
-    ? `<button class="btn" id="create">＋ ${esc(l.createClass)}</button>`
-    : `<button class="btn" id="join">＋ ${esc(l.joinClass)}</button>`;
+  const hero = isTeacher ? `
+    <div class="k">${esc(l.brand)} · ${esc(l.roleTeacher)}</div>
+    <h1>أهلًا ${esc(first)} 👋</h1>
+    <p>تابع دوراتك، أنشئ الجلسات، وسجّل الحضور.</p>
+    <div class="stats">
+      <div class="stat"><b>${classes.length}</b><span>${esc(l.teacherDash)}</span></div>
+      <div class="stat"><b>${totalMembers}</b><span>${esc(l.members)}</span></div>
+    </div>
+    <button class="cta" id="heroCreate">＋ ${esc(l.createClass)}</button>` : `
+    <div class="k">${esc(l.brand)} · ${esc(l.roleStudent)}</div>
+    <h1>أهلًا ${esc(first)} 👋</h1>
+    <p>انضم إلى دوراتك وتابع مهامك في مكان واحد.</p>
+    <div class="stats"><div class="stat"><b>${classes.length}</b><span>${esc(l.studentDash)}</span></div></div>
+    <button class="cta" id="heroJoin">＋ ${esc(l.joinClass)}</button>`;
 
   mount(`
-    ${topbar(right)}
-    <div class="page">
-      <div class="spread" style="margin-bottom:18px">
-        <div><div class="kicker">${esc(l.brand)}</div><h1>${esc(isTeacher ? l.teacherDash : l.studentDash)}</h1></div>
-        ${action}
+  <div class="dash">
+    <aside class="dside">
+      <div class="brand"><span class="logo">${LOGO}</span>${esc(l.brand)}</div>
+      <nav class="dnav">
+        <button class="on" data-nav="home">${I_HOME} ${esc(l.teacherDash)}</button>
+      </nav>
+      <div class="foot">
+        <div class="me">
+          <div class="avatar sm">${esc(initial(profile.full_name))}</div>
+          <div><div style="font-weight:700;font-size:13.5px">${esc(profile.full_name)}</div>
+            <div class="muted small">${esc(isTeacher ? l.roleTeacher : l.roleStudent)}</div></div>
+        </div>
+        <button class="btn ghost sm block" id="out">${esc(l.signOut)}</button>
       </div>
-      ${classes.length ? `<div class="grid">${cards}</div>` : `<div class="empty">${esc(l.noClasses)}</div>`}
-    </div>
-  `);
-  wireTopbar(reroute);
-  document.getElementById('out').onclick = async () => { await signOut(); };
+    </aside>
 
-  document.querySelectorAll('.class-card').forEach((el) => {
+    <main class="dmain">
+      <div class="dtop">
+        <div class="sp"></div>
+        <button class="icon-btn" id="langBtn" title="Language">${getLang() === 'ar' ? 'EN' : 'ع'}</button>
+        <button class="icon-btn" id="themeBtn" title="Theme">${getTheme() === 'light' ? '🌙' : '☀️'}</button>
+      </div>
+
+      <section class="hero">${hero}</section>
+
+      <div class="spread" style="margin:0 4px 14px">
+        <h2 style="font-size:19px">${esc(l.teacherDash)}</h2>
+        <button class="btn sm" id="${isTeacher ? 'create' : 'join'}">＋ ${esc(isTeacher ? l.createClass : l.joinClass)}</button>
+      </div>
+      ${classes.length ? `<div class="ccards">${cards}</div>` : `<div class="empty">${esc(l.noClasses)}</div>`}
+    </main>
+  </div>`);
+
+  // toggles + logout
+  document.getElementById('out').onclick = async () => { await signOut(); };
+  document.getElementById('themeBtn').onclick = () => { toggleTheme(); reroute(); };
+  document.getElementById('langBtn').onclick = () => { toggleLang(); reroute(); };
+
+  // open a course
+  document.querySelectorAll('.ccard').forEach((el) => {
     el.onclick = () => go('#/classroom/' + el.dataset.id);
   });
 
+  // delete a course (teacher)
+  document.querySelectorAll('[data-del]').forEach((btn) => {
+    btn.onclick = async (e) => {
+      e.stopPropagation();
+      const ok = await confirmDialog({ title: l.deleteClass, message: l.confirmDelete, confirmText: l.deleteClass });
+      if (!ok) return;
+      try { await deleteClassroom(btn.dataset.del); toast(l.deleted); reroute(); }
+      catch (_) { toast(l.error, true); }
+    };
+  });
+
+  // create / join (header button + hero button)
   if (isTeacher) {
-    document.getElementById('create').onclick = () => openCreate(profile, l);
+    const open = () => openCreate(profile, l);
+    document.getElementById('create').onclick = open;
+    const hc = document.getElementById('heroCreate'); if (hc) hc.onclick = open;
   } else {
-    document.getElementById('join').onclick = () => openJoin(profile, l);
+    const open = () => openJoin(profile, l);
+    document.getElementById('join').onclick = open;
+    const hj = document.getElementById('heroJoin'); if (hj) hj.onclick = open;
   }
 }
 

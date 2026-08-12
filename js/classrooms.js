@@ -51,6 +51,12 @@ export async function getClassroom(id) {
   return data;
 }
 
+// Delete a classroom the teacher owns (cascades to members/goals/tasks/… via FKs).
+export async function deleteClassroom(id) {
+  const { error } = await supabase.from('classrooms').delete().eq('id', id);
+  if (error) throw error;
+}
+
 // Returns 'joined' | 'already' | 'invalid'
 export async function joinByCode(code, studentId) {
   const { data: room } = await supabase

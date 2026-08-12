@@ -1,8 +1,12 @@
 // Classroom view: shell + panels. The Goals panel is foundation (friend);
 // Tasks / People / Files / Chat panels + class progress are ★ your features 8-14.
-import { t } from '../js/i18n.js';
-import { mount, topbar, wireTopbar, toast, esc, initial, fmtDate, fmtDay } from '../js/ui.js';
+import { t, toggleTheme, toggleLang, getTheme, getLang } from '../js/i18n.js';
+import { mount, toast, esc, initial, fmtDate, fmtDay, confirmDialog } from '../js/ui.js';
+import { signOut } from '../js/auth.js';
 import { reroute, go } from '../js/router.js';
+
+const LOGO = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10 12 5 2 10l10 5 10-5Z"/><path d="M6 12v5c0 1 2.7 2.5 6 2.5s6-1.5 6-2.5v-5"/><path d="M22 10v5"/></svg>`;
+const I_HOME = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/></svg>`;
 import { getClassroom } from '../js/classrooms.js';
 import { listGoals, addGoal } from '../js/goals.js';
 import { listTasks, addTask, listCompletions, markDone, unmarkDone } from '../js/tasks.js';
@@ -11,6 +15,7 @@ import { taskProgress, studentProgress, classProgress } from '../js/progress.js'
 import { uploadSubmission, listSubmissions, signedUrl, fileExt, MAX_BYTES } from '../js/submissions.js';
 import { listMessages, sendMessage, encodeAttachment } from '../js/chat.js';
 import { subscribeToClassroom } from '../js/realtime.js';
+import { listAttendance, setAttendance } from '../js/attendance.js';
 
 let unsub = null; // teardown for the previous room's realtime channel
 
@@ -60,30 +65,59 @@ function renderShell(S) {
   const tabs = [
     ['goals', l.goals], ['tasks', l.tabTasks], ['people', l.people], ['files', l.files], ['chat', l.chat],
   ];
+  if (S.isTeacher) tabs.push(['attendance', l.attendance]); // الحضور — للمدرّب فقط
   mount(`
-    ${topbar(`<button class="btn ghost sm" id="back">${esc(l.back)} ↩</button>`)}
-    <div class="room-head">
-      <div class="spread">
-        <div>
-          <h2>${esc(S.room.name)}</h2>
-          <p class="muted small">${esc(S.room.description || '')}</p>
-          <div class="row" style="margin-top:6px">
-            <span class="pill code" id="code">${esc(S.room.classroom_code)} ⧉</span>
-            <span class="pill live">● ${esc(l.live)}</span>
+  <div class="dash">
+    <aside class="dside">
+      <div class="brand"><span class="logo">${LOGO}</span>${esc(l.brand)}</div>
+      <nav class="dnav">
+        <button data-nav="home">${I_HOME} ${esc(l.teacherDash)}</button>
+      </nav>
+      <div class="foot">
+        <div class="me">
+          <div class="avatar sm">${esc(initial(S.profile.full_name))}</div>
+          <div><div style="font-weight:700;font-size:13.5px">${esc(S.profile.full_name)}</div>
+            <div class="muted small">${esc(S.isTeacher ? l.roleTeacher : l.roleStudent)}</div></div>
+        </div>
+        <button class="btn ghost sm block" id="out">${esc(l.signOut)}</button>
+      </div>
+    </aside>
+
+    <main class="dmain">
+      <div class="dtop">
+        <button class="btn ghost sm" id="back">${esc(l.back)} ↩</button>
+        <div class="sp"></div>
+        <button class="icon-btn" id="langBtn" title="Language">${getLang() === 'ar' ? 'EN' : 'ع'}</button>
+        <button class="icon-btn" id="themeBtn" title="Theme">${getTheme() === 'light' ? '🌙' : '☀️'}</button>
+      </div>
+
+      <div class="room-head">
+        <div class="spread">
+          <div>
+            <h2>${esc(S.room.name)}</h2>
+            <p class="muted small">${esc(S.room.description || '')}</p>
+            <div class="row" style="margin-top:6px">
+              <span class="pill code" id="code">${esc(S.room.classroom_code)} ⧉</span>
+              <span class="pill live">● ${esc(l.live)}</span>
+            </div>
+          </div>
+          <div class="row">
+            <div class="ring" id="cpRing" style="--p:${cp}"><b>${cp}%</b></div>
+            <div class="small muted">${esc(l.classProgress)}</div>
           </div>
         </div>
-        <div class="row">
-          <div class="ring" id="cpRing" style="--p:${cp}"><b>${cp}%</b></div>
-          <div class="small muted">${esc(l.classProgress)}</div>
-        </div>
       </div>
-    </div>
-    <div class="tabs" id="tabs">
-      ${tabs.map(([k, label]) => `<button class="tab ${k === S.tab ? 'active' : ''}" data-tab="${k}">${esc(label)}</button>`).join('')}
-    </div>
-    <div id="panel"></div>
+      <div class="tabs" id="tabs">
+        ${tabs.map(([k, label]) => `<button class="tab ${k === S.tab ? 'active' : ''}" data-tab="${k}">${esc(label)}</button>`).join('')}
+      </div>
+      <div id="panel"></div>
+    </main>
+  </div>
   `);
-  wireTopbar(reroute);
+  document.getElementById('out').onclick = async () => { await signOut(); };
+  document.getElementById('themeBtn').onclick = () => { toggleTheme(); reroute(); };
+  document.getElementById('langBtn').onclick = () => { toggleLang(); reroute(); };
+  document.querySelector('[data-nav="home"]').onclick = () => go('#/dashboard');
   document.getElementById('back').onclick = () => go('#/dashboard');
   document.getElementById('code').onclick = () => {
     navigator.clipboard?.writeText(S.room.classroom_code); toast(l.codeCopied);
@@ -106,7 +140,7 @@ function refreshHeader(S) {
 }
 
 function renderPanel(S) {
-  const map = { goals: goalsPanel, tasks: tasksPanel, people: peoplePanel, files: filesPanel, chat: chatPanel };
+  const map = { goals: goalsPanel, tasks: tasksPanel, people: peoplePanel, files: filesPanel, chat: chatPanel, attendance: attendancePanel };
   (map[S.tab] || tasksPanel)(S);
 }
 function setPanel(html) { document.getElementById('panel').innerHTML = html; }
@@ -240,11 +274,70 @@ function peoplePanel(S) {
 
   document.querySelectorAll('[data-remove]').forEach((btn) => {
     btn.onclick = async () => {
-      if (!confirm(l.confirmRemove)) return;
+      const ok = await confirmDialog({ title: l.remove, message: l.confirmRemove, confirmText: l.remove });
+      if (!ok) return;
       try { await removeMember(btn.dataset.remove); S.members = await listMembers(S.id); refreshHeader(S); renderPanel(S); toast(l.removed); }
       catch (e) { toast(l.error, true); }
     };
   });
+}
+
+/* ---------------- attendance (تحضير المتدرّبين — للمدرّب) ---------------- */
+function attendancePanel(S) {
+  const l = t();
+  if (!S.attDate) S.attDate = new Date().toISOString().slice(0, 10); // اليوم افتراضيًا
+
+  setPanel(`<div class="panel att-wrap">
+    <div class="att-bar">
+      <div><div style="font-weight:800;font-size:16px">${esc(l.attendance)}</div>
+        <div class="small muted">${esc(l.sessionDate)}</div></div>
+      <input type="date" id="attDate" value="${S.attDate}" />
+    </div>
+    <div class="att-stats" id="attStats"></div>
+    <div id="attList" class="stack"></div>
+  </div>`);
+
+  const paint = async () => {
+    let recs = [];
+    try { recs = await listAttendance(S.id, S.attDate); } catch (e) { toast(l.error, true); }
+    const byId = {};
+    recs.forEach((r) => { byId[r.student_id] = r.present; });
+
+    const present = S.members.filter((m) => byId[m.studentId] === true).length;
+    const absent = S.members.filter((m) => byId[m.studentId] === false).length;
+    const total = S.members.length;
+    const rate = total ? Math.round((present / total) * 100) : 0;
+
+    document.getElementById('attStats').innerHTML = `
+      <div class="att-stat ok"><div class="n">${present}</div><div class="l">${esc(l.present)}</div></div>
+      <div class="att-stat no"><div class="n">${absent}</div><div class="l">${esc(l.absent)}</div></div>
+      <div class="att-stat rate"><div class="n">${rate}%</div><div class="l">${esc(l.attRate)}</div></div>`;
+
+    const list = document.getElementById('attList');
+    if (!total) { list.innerHTML = `<div class="empty">${esc(l.nobodyYet)}</div>`; return; }
+    list.innerHTML = S.members.map((m) => {
+      const st = byId[m.studentId];
+      return `<div class="att-row">
+        <div class="row"><div class="avatar sm">${esc(initial(m.name))}</div><b>${esc(m.name)}</b></div>
+        <div class="seg">
+          <button class="${st === true ? 'on-p' : ''}" data-att="1" data-sid="${m.studentId}">${esc(l.present)}</button>
+          <button class="${st === false ? 'on-a' : ''}" data-att="0" data-sid="${m.studentId}">${esc(l.absent)}</button>
+        </div>
+      </div>`;
+    }).join('');
+
+    list.querySelectorAll('[data-sid]').forEach((btn) => {
+      btn.onclick = async () => {
+        try {
+          await setAttendance({ classroomId: S.id, studentId: btn.dataset.sid, date: S.attDate, present: btn.dataset.att === '1' });
+          await paint();
+        } catch (e) { toast(l.error, true); }
+      };
+    });
+  };
+
+  document.getElementById('attDate').onchange = (e) => { S.attDate = e.target.value; paint(); };
+  paint();
 }
 
 /* ---------------- files / submissions (★ feature 12) ---------------- */
