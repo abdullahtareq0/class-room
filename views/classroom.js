@@ -16,6 +16,7 @@ import { uploadSubmission, listSubmissions, signedUrl, fileExt, MAX_BYTES } from
 import { listMessages, sendMessage, encodeAttachment } from '../js/chat.js';
 import { subscribeToClassroom } from '../js/realtime.js';
 import { listAttendance, setAttendance } from '../js/attendance.js';
+import { mountAnnouncements } from '../js/announcements.js';
 
 let unsub = null; // teardown for the previous room's realtime channel
 
@@ -73,6 +74,7 @@ function renderShell(S) {
       <nav class="dnav">
         <button data-nav="home">${I_HOME} ${esc(l.teacherDash)}</button>
       </nav>
+      <div id="annPanel" class="ann-panel"></div>
       <div class="foot">
         <div class="me">
           <div class="avatar sm">${esc(initial(S.profile.full_name))}</div>
@@ -119,6 +121,8 @@ function renderShell(S) {
   document.getElementById('langBtn').onclick = () => { toggleLang(); reroute(); };
   document.querySelector('[data-nav="home"]').onclick = () => go('#/dashboard');
   document.getElementById('back').onclick = () => go('#/dashboard');
+  // announcements sidebar panel (defaults new announcements to this course)
+  mountAnnouncements(S.profile, { currentClassroomId: S.id });
   document.getElementById('code').onclick = () => {
     navigator.clipboard?.writeText(S.room.classroom_code); toast(l.codeCopied);
   };

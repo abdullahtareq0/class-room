@@ -282,3 +282,21 @@ textarea { resize: vertical; min-height: 64px; }
 .cdialog-acts { display: flex; gap: 10px; justify-content: flex-start; }
 .cdialog .btn.danger { background: var(--danger); color: #fff; border: 0; }
 @media (prefers-reduced-motion: reduce) { .cdialog-backdrop, .cdialog { transition: none; } }
+
+/* ---------- announcements (sidebar panel) ---------- */
+.ann-panel { flex: 1; min-height: 0; display: flex; flex-direction: column; margin: 14px 0 6px; }
+.ann-head { display: flex; align-items: center; justify-content: space-between; gap: 8px;
+  font-size: 12px; font-weight: 700; letter-spacing: .5px; color: var(--muted); text-transform: uppercase; padding: 0 4px 8px; }
+.ann-add { width: 26px; height: 26px; border-radius: 8px; border: 1px solid var(--line); background: var(--card);
+  color: var(--brand-dark); font-size: 16px; line-height: 1; display: grid; place-items: center; }
+.ann-add:hover { border-color: var(--brand); background: var(--brand-tint); }
+.ann-list { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; padding-inline-end: 2px; }
+.ann-item { background: var(--card); border: 1px solid var(--line); border-inline-start: 3px solid var(--brand);
+  border-radius: 12px; padding: 10px 12px; }
+.ann-course { font-size: 11px; font-weight: 700; color: var(--brand-dark); background: var(--brand-tint);
+  display: inline-block; padding: 2px 8px; border-radius: 999px; margin-bottom: 4px; }
+.ann-title { font-weight: 700; font-size: 14px; color: var(--ink); }
+.ann-body { font-size: 12.5px; color: var(--muted); margin-top: 2px; line-height: 1.5;
+  display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+.ann-time { font-size: 11px; color: var(--muted-2); margin-top: 6px; }
+.ann-empty { font-size: 13px; color: var(--muted-2); text-align: center; padding: 18px 8px; }

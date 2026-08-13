@@ -40,6 +40,10 @@ const STR = {
     deleteClass: 'حذف الدورة', confirmDelete: 'حذف هذه الدورة نهائيًا؟ سيُحذف كل ما فيها.', deleted: 'تم الحذف',
     attendance: 'الحضور', sessionDate: 'تاريخ الجلسة', present: 'حاضر', absent: 'غائب', attRate: 'نسبة الحضور',
     confirm: 'تأكيد', cancel: 'إلغاء',
+    // announcements
+    announcements: 'الإعلانات', newAnnouncement: 'إعلان جديد', annTitle: 'عنوان الإعلان',
+    annBody: 'نص الإعلان (اختياري)', chooseCourse: 'اختر الدورة', sendAnnouncement: 'إرسال الإعلان',
+    noAnnouncements: 'لا توجد إعلانات بعد.', announcementSent: 'تم إرسال الإعلان', from: 'من',
   },
   en: {
     brand: 'Itqan', dir: 'ltr',
@@ -76,6 +80,10 @@ const STR = {
     deleteClass: 'Delete course', confirmDelete: 'Delete this course permanently? Everything in it will be removed.', deleted: 'Deleted',
     attendance: 'Attendance', sessionDate: 'Session date', present: 'Present', absent: 'Absent', attRate: 'Attendance rate',
     confirm: 'Confirm', cancel: 'Cancel',
+    // announcements
+    announcements: 'Announcements', newAnnouncement: 'New announcement', annTitle: 'Announcement title',
+    annBody: 'Announcement text (optional)', chooseCourse: 'Choose course', sendAnnouncement: 'Send announcement',
+    noAnnouncements: 'No announcements yet.', announcementSent: 'Announcement sent', from: 'from',
   },
 };
 
