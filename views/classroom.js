@@ -17,6 +17,7 @@ import { uploadSubmission, listSubmissions, signedUrl, fileExt, MAX_BYTES } from
 import { listMessages, sendMessage, encodeAttachment } from '../js/chat.js';
 import { subscribeToClassroom } from '../js/realtime.js';
 import { listAttendance, setAttendance, studentAttendanceStats, studentAttendanceList } from '../js/attendance.js';
+import { I_MEGA, bellHtml, wireBell } from '../js/announcements.js';
 
 let unsub = null; // teardown for the previous room's realtime channel
 
@@ -74,6 +75,7 @@ function renderShell(S) {
       <nav class="dnav">
         <button data-nav="home">${I_HOME} ${esc(l.teacherDash)}</button>
         ${!S.isTeacher ? `<button data-nav="stats">${I_CHART} ${esc(l.myStats)}</button>` : ''}
+        <button data-nav="ann">${I_MEGA} ${esc(l.announcements)}</button>
       </nav>
       <div class="foot">
         <div class="me">
@@ -89,6 +91,7 @@ function renderShell(S) {
       <div class="dtop">
         <button class="btn ghost sm" id="back">${esc(l.back)} ↩</button>
         <div class="sp"></div>
+        ${bellHtml(S.profile)}
         <button class="icon-btn" id="langBtn" title="Language">${getLang() === 'ar' ? 'EN' : 'ع'}</button>
         <button class="icon-btn" id="themeBtn" title="Theme">${getTheme() === 'light' ? '🌙' : '☀️'}</button>
       </div>
@@ -121,7 +124,9 @@ function renderShell(S) {
   document.getElementById('langBtn').onclick = () => { toggleLang(); reroute(); };
   document.querySelector('[data-nav="home"]').onclick = () => go('#/dashboard');
   const navStats = document.querySelector('[data-nav="stats"]'); if (navStats) navStats.onclick = () => go('#/stats');
+  document.querySelector('[data-nav="ann"]').onclick = () => go('#/announcements');
   document.getElementById('back').onclick = () => go('#/dashboard');
+  wireBell(S.profile);
   document.getElementById('code').onclick = () => {
     navigator.clipboard?.writeText(S.room.classroom_code); toast(l.codeCopied);
   };

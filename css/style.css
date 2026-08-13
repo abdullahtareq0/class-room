@@ -301,3 +301,52 @@ textarea { resize: vertical; min-height: 64px; }
 .cdialog-acts { display: flex; gap: 10px; justify-content: flex-start; }
 .cdialog .btn.danger { background: var(--danger); color: #fff; border: 0; }
 @media (prefers-reduced-motion: reduce) { .cdialog-backdrop, .cdialog { transition: none; } }
+
+/* ---------- announcements (sidebar panel) ---------- */
+.ann-panel { flex: 1; min-height: 0; display: flex; flex-direction: column; margin: 14px 0 6px; }
+.ann-head { display: flex; align-items: center; justify-content: space-between; gap: 8px;
+  font-size: 12px; font-weight: 700; letter-spacing: .5px; color: var(--muted); text-transform: uppercase; padding: 0 4px 8px; }
+.ann-add { width: 26px; height: 26px; border-radius: 8px; border: 1px solid var(--line); background: var(--card);
+  color: var(--brand-dark); font-size: 16px; line-height: 1; display: grid; place-items: center; }
+.ann-add:hover { border-color: var(--brand); background: var(--brand-tint); }
+.ann-list { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; padding-inline-end: 2px; }
+.ann-item { background: var(--card); border: 1px solid var(--line); border-inline-start: 3px solid var(--brand);
+  border-radius: 12px; padding: 10px 12px; }
+.ann-course { font-size: 11px; font-weight: 700; color: var(--brand-dark); background: var(--brand-tint);
+  display: inline-block; padding: 2px 8px; border-radius: 999px; margin-bottom: 4px; }
+.ann-title { font-weight: 700; font-size: 14px; color: var(--ink); }
+.ann-body { font-size: 12.5px; color: var(--muted); margin-top: 2px; line-height: 1.5;
+  display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+.ann-time { font-size: 11px; color: var(--muted-2); margin-top: 6px; }
+.ann-empty { font-size: 13px; color: var(--muted-2); text-align: center; padding: 18px 8px; }
+
+/* announcements page cards */
+.ann-cards { display: flex; flex-direction: column; gap: 14px; }
+.ann-card { background: var(--card); border: 1px solid var(--line); border-inline-start: 4px solid var(--brand);
+  border-radius: var(--radius-md); box-shadow: var(--shadow); padding: 16px 18px; }
+.ann-card-top { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 8px; }
+.ann-card-title { font-weight: 800; font-size: 17px; color: var(--ink); }
+.ann-card-body { color: var(--muted); font-size: 14px; margin-top: 6px; line-height: 1.7; white-space: pre-wrap; }
+
+/* notification bell */
+.icon-btn { display: inline-grid; place-items: center; }
+.icon-btn svg { width: 18px; height: 18px; display: block; }
+.icon-btn.bell { position: relative; }
+.bell-item.unread { background: color-mix(in srgb, var(--brand-tint) 55%, transparent); }
+.bell-badge { position: absolute; top: -5px; inset-inline-end: -5px; min-width: 17px; height: 17px; padding: 0 4px;
+  background: var(--danger); color: #fff; border-radius: 999px; font-size: 10px; font-weight: 800;
+  display: grid; place-items: center; line-height: 1; }
+.bell-drop { position: fixed; z-index: 120; width: 320px; max-width: calc(100vw - 16px);
+  background: var(--card); border: 1px solid var(--line); border-radius: 16px; box-shadow: var(--shadow);
+  overflow: hidden; display: flex; flex-direction: column; max-height: 70vh; }
+.bell-drop-head { padding: 12px 14px; font-weight: 800; font-size: 14px; border-bottom: 1px solid var(--line); }
+.bell-drop-list { overflow-y: auto; display: flex; flex-direction: column; }
+.bell-item { text-align: start; background: transparent; border: 0; border-bottom: 1px solid var(--line);
+  padding: 11px 14px; cursor: pointer; display: block; width: 100%; }
+.bell-item:hover { background: var(--surface); }
+.bell-item-title { font-weight: 700; font-size: 14px; color: var(--ink); margin: 3px 0 2px; }
+.bell-item-body { font-size: 12.5px; color: var(--muted); line-height: 1.5;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.bell-drop-all { border: 0; background: var(--brand-tint); color: var(--brand-dark); font-weight: 700;
+  padding: 12px; cursor: pointer; font-size: 13.5px; }
+.bell-drop-all:hover { background: var(--brand-tint-2); }

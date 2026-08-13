@@ -8,6 +8,7 @@ import { renderSignup } from '../views/signup.js';
 import { renderDashboard } from '../views/dashboard.js';
 import { renderClassroom } from '../views/classroom.js';
 import { renderStats } from '../views/stats.js';
+import { renderAnnouncementsPage } from './announcements.js';
 
 applyTheme();
 applyDir();
@@ -33,6 +34,7 @@ async function handleRoute() {
 
   if (path === 'classroom' && arg) return renderClassroom(arg, profile);
   if (path === 'stats') return renderStats(profile);
+  if (path === 'announcements') return renderAnnouncementsPage(profile);
   return renderDashboard(profile);
 }
 

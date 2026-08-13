@@ -44,6 +44,11 @@ const STR = {
     myStats: 'إحصائياتي', chooseCourse: 'اختر الدورة', completionRate: 'نسبة الإنجاز',
     daysAttended: 'أيام حضرتها', daysLeft: 'يوم متبقٍّ', endedLabel: 'انتهت',
     courseEnd: 'تاريخ انتهاء الدورة', endRequired: 'اختر تاريخ انتهاء الدورة أولًا',
+    // announcements
+    announcements: 'الإعلانات', newAnnouncement: 'إعلان جديد', annTitle: 'عنوان الإعلان',
+    annBody: 'نص الإعلان (اختياري)', sendAnnouncement: 'إرسال الإعلان',
+    noAnnouncements: 'لا يوجد أي إعلان حاليًا 📭', announcementSent: 'تم إرسال الإعلان', from: 'من',
+    latestAnnouncements: 'آخر الإعلانات', viewAll: 'عرض كل الإعلانات',
   },
   en: {
     brand: 'Itqan', dir: 'ltr',
@@ -84,6 +89,11 @@ const STR = {
     myStats: 'My stats', chooseCourse: 'Choose course', completionRate: 'Completion',
     daysAttended: 'Days attended', daysLeft: 'Days left', endedLabel: 'Ended',
     courseEnd: 'Course end date', endRequired: 'Pick a course end date first',
+    // announcements
+    announcements: 'Announcements', newAnnouncement: 'New announcement', annTitle: 'Announcement title',
+    annBody: 'Announcement text (optional)', sendAnnouncement: 'Send announcement',
+    noAnnouncements: 'No announcements right now 📭', announcementSent: 'Announcement sent', from: 'from',
+    latestAnnouncements: 'Latest announcements', viewAll: 'View all announcements',
   },
 };
 
