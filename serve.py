@@ -1,9 +1,7 @@
-# سيرفر محلي بدون كاش — يخلّي التعديلات تظهر فورًا بدون الحاجة لـ Ctrl+Shift+R.
-# التشغيل:  python serve.py    ثم افتح  http://localhost:5501
+# سيرفر محلي بدون كاش — يخلّي التعديلات تظهر فورًا بدون Ctrl+Shift+R.
+# يلقى منفذًا فاضيًا تلقائيًا ويطبع الرابط. التشغيل:  python serve.py
 import http.server
 import socketserver
-
-PORT = 5501
 
 
 class NoCacheHandler(http.server.SimpleHTTPRequestHandler):
@@ -14,6 +12,19 @@ class NoCacheHandler(http.server.SimpleHTTPRequestHandler):
         super().end_headers()
 
 
-with socketserver.TCPServer(('127.0.0.1', PORT), NoCacheHandler) as httpd:
-    print(f'Serving http://localhost:{PORT}  (no-cache)  —  Ctrl+C للإيقاف')
-    httpd.serve_forever()
+httpd = None
+for port in range(5501, 5600):
+    try:
+        httpd = socketserver.TCPServer(('127.0.0.1', port), NoCacheHandler)
+        break
+    except OSError:
+        continue
+
+if httpd is None:
+    raise SystemExit('ما فيه منفذ فاضي بين 5501 و 5599.')
+
+print('=' * 48)
+print(f'  افتح المتصفح على:  http://localhost:{port}')
+print('  (سيرفر بدون كاش — Ctrl+C للإيقاف)')
+print('=' * 48)
+httpd.serve_forever()
