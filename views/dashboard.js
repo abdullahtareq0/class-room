@@ -77,8 +77,8 @@ export async function renderDashboard(profile) {
 
     <main class="dmain">
       <div class="dtop">
-        ${!isTeacher ? `<button class="icon-btn bell" id="bellBtn" title="${esc(l.announcements)}">${I_BELL}<span class="bell-badge" id="bellBadge" hidden></span></button>` : ''}
         <div class="sp"></div>
+        ${!isTeacher ? `<button class="icon-btn bell" id="bellBtn" title="${esc(l.announcements)}">${I_BELL}<span class="bell-badge" id="bellBadge" hidden></span></button>` : ''}
         <button class="icon-btn" id="langBtn" title="Language">${getLang() === 'ar' ? 'EN' : 'ع'}</button>
         <button class="icon-btn" id="themeBtn" title="Theme">${getTheme() === 'light' ? '🌙' : '☀️'}</button>
       </div>

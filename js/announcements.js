@@ -89,41 +89,46 @@ export function wireBell(profile) {
     if (drop && !drop.contains(e.target) && !bell.contains(e.target)) close();
   };
 
-  bell.onclick = async (e) => {
+  bell.onclick = (e) => {
     e.stopPropagation();
     if (drop) { close(); return; }
     const l = t();
-    let list = [];
-    try { list = await listForUser(profile); } catch (_) {}
-    const top = list.slice(0, 6);
-
+    // open instantly with a loading state, then fill (never block on the network)
     drop = document.createElement('div');
     drop.className = 'bell-drop';
     drop.innerHTML = `
       <div class="bell-drop-head">📣 ${esc(l.latestAnnouncements)}</div>
-      <div class="bell-drop-list">
-        ${top.length
-          ? top.map((a) => `
-            <button class="bell-item" data-go="1">
-              <span class="ann-course">${esc(a.courseName)}</span>
-              <div class="bell-item-title">${esc(a.title)}</div>
-              ${a.body ? `<div class="bell-item-body">${esc(a.body)}</div>` : ''}
-              <div class="ann-time">${esc(fmtDate(a.createdAt))}</div>
-            </button>`).join('')
-          : `<div class="empty" style="padding:20px 8px">${esc(l.noAnnouncements)}</div>`}
-      </div>
-      <button class="bell-drop-all" data-go="1">${esc(l.viewAll)} ↩</button>`;
+      <div class="bell-drop-list" id="bellList">
+        <div class="empty" style="padding:26px"><div class="spin"></div></div>
+      </div>`;
     document.body.appendChild(drop);
 
     // position under the bell
     const r = bell.getBoundingClientRect();
     drop.style.top = `${r.bottom + 8}px`;
     drop.style.left = `${Math.max(8, Math.min(r.left, window.innerWidth - 328))}px`;
-
-    drop.querySelectorAll('[data-go]').forEach((el) => {
-      el.onclick = () => { close(); go('#/announcements'); };
-    });
     setTimeout(() => document.addEventListener('click', onDoc, true), 0);
+
+    listForUser(profile).then((list) => {
+      const host = drop && drop.querySelector('#bellList');
+      if (!host) return;
+      const top = list.slice(0, 6);
+      host.innerHTML = top.length
+        ? top.map((a) => `
+          <button class="bell-item" data-go="1">
+            <span class="ann-course">${esc(a.courseName)}</span>
+            <div class="bell-item-title">${esc(a.title)}</div>
+            ${a.body ? `<div class="bell-item-body">${esc(a.body)}</div>` : ''}
+            <div class="ann-time">${esc(fmtDate(a.createdAt))}</div>
+          </button>`).join('')
+        : `<div class="empty" style="padding:26px 12px">${esc(l.noAnnouncements)}</div>`;
+      host.querySelectorAll('[data-go]').forEach((el) => {
+        el.onclick = () => { close(); go('#/announcements'); };
+      });
+    }).catch(() => {
+      const host = drop && drop.querySelector('#bellList');
+      if (host) host.innerHTML = `<div class="empty" style="padding:26px 12px">${esc(l.error)}</div>`;
+    });
   };
 }
 
