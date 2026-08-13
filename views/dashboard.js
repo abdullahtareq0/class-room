@@ -4,7 +4,7 @@ import { t, toggleTheme, toggleLang, getTheme, getLang } from '../js/i18n.js';
 import { mount, toast, esc, initial, confirmDialog } from '../js/ui.js';
 import { reroute, go } from '../js/router.js';
 import { createClassroom, listForTeacher, listForStudent, joinByCode, deleteClassroom } from '../js/classrooms.js';
-import { mountAnnouncements } from '../js/announcements.js';
+import { I_MEGA, I_BELL, wireBell } from '../js/announcements.js';
 
 const LOGO = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10 12 5 2 10l10 5 10-5Z"/><path d="M6 12v5c0 1 2.7 2.5 6 2.5s6-1.5 6-2.5v-5"/><path d="M22 10v5"/></svg>`;
 const I_HOME = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/></svg>`;
@@ -63,8 +63,8 @@ export async function renderDashboard(profile) {
       <div class="brand"><span class="logo">${LOGO}</span>${esc(l.brand)}</div>
       <nav class="dnav">
         <button class="on" data-nav="home">${I_HOME} ${esc(l.teacherDash)}</button>
+        <button data-nav="ann">${I_MEGA} ${esc(l.announcements)}</button>
       </nav>
-      <div id="annPanel" class="ann-panel"></div>
       <div class="foot">
         <div class="me">
           <div class="avatar sm">${esc(initial(profile.full_name))}</div>
@@ -77,6 +77,7 @@ export async function renderDashboard(profile) {
 
     <main class="dmain">
       <div class="dtop">
+        ${!isTeacher ? `<button class="icon-btn bell" id="bellBtn" title="${esc(l.announcements)}">${I_BELL}<span class="bell-badge" id="bellBadge" hidden></span></button>` : ''}
         <div class="sp"></div>
         <button class="icon-btn" id="langBtn" title="Language">${getLang() === 'ar' ? 'EN' : 'ع'}</button>
         <button class="icon-btn" id="themeBtn" title="Theme">${getTheme() === 'light' ? '🌙' : '☀️'}</button>
@@ -92,8 +93,9 @@ export async function renderDashboard(profile) {
     </main>
   </div>`);
 
-  // announcements sidebar panel (live)
-  mountAnnouncements(profile);
+  // announcements: sidebar nav → page; (student) bell → dropdown of latest
+  document.querySelector('[data-nav="ann"]').onclick = () => go('#/announcements');
+  wireBell(profile);
 
   // toggles + logout
   document.getElementById('out').onclick = async () => { await signOut(); };

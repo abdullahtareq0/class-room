@@ -44,6 +44,7 @@ const STR = {
     announcements: 'الإعلانات', newAnnouncement: 'إعلان جديد', annTitle: 'عنوان الإعلان',
     annBody: 'نص الإعلان (اختياري)', chooseCourse: 'اختر الدورة', sendAnnouncement: 'إرسال الإعلان',
     noAnnouncements: 'لا توجد إعلانات بعد.', announcementSent: 'تم إرسال الإعلان', from: 'من',
+    latestAnnouncements: 'آخر الإعلانات', viewAll: 'عرض كل الإعلانات',
   },
   en: {
     brand: 'Itqan', dir: 'ltr',
@@ -84,6 +85,7 @@ const STR = {
     announcements: 'Announcements', newAnnouncement: 'New announcement', annTitle: 'Announcement title',
     annBody: 'Announcement text (optional)', chooseCourse: 'Choose course', sendAnnouncement: 'Send announcement',
     noAnnouncements: 'No announcements yet.', announcementSent: 'Announcement sent', from: 'from',
+    latestAnnouncements: 'Latest announcements', viewAll: 'View all announcements',
   },
 };
 
