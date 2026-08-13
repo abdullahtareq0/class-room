@@ -264,6 +264,10 @@ export async function renderAnnouncementsPage(profile) {
     if (!host) return;
     let list = [];
     try { list = await listForUser(profile); } catch (_) {}
+    // being on this page means the user is seeing every announcement → mark them
+    // all read so the notification badge clears everywhere.
+    list.forEach((a) => markRead(profile.id, a.id));
+    setBadge(0);
     host.innerHTML = list.length
       ? list.map((a) => `
         <div class="ann-card">
