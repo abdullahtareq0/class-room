@@ -11,13 +11,13 @@ function randomCode() {
   return c;
 }
 
-export async function createClassroom({ name, description, teacherId }) {
+export async function createClassroom({ name, description, teacherId, endDate }) {
   // retry until the random code is unique
   for (let i = 0; i < 6; i++) {
     const code = randomCode();
     const { data, error } = await supabase
       .from('classrooms')
-      .insert({ name, description, teacher_id: teacherId, classroom_code: code })
+      .insert({ name, description, teacher_id: teacherId, classroom_code: code, end_date: endDate || null })
       .select()
       .single();
     if (!error) return data;

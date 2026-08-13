@@ -39,7 +39,11 @@ const STR = {
     // delete course + attendance
     deleteClass: 'حذف الدورة', confirmDelete: 'حذف هذه الدورة نهائيًا؟ سيُحذف كل ما فيها.', deleted: 'تم الحذف',
     attendance: 'الحضور', sessionDate: 'تاريخ الجلسة', present: 'حاضر', absent: 'غائب', attRate: 'نسبة الحضور',
+    noAttendanceYet: 'لا يوجد سجل حضور بعد', absRate: 'نسبة الغياب',
     confirm: 'تأكيد', cancel: 'إلغاء',
+    myStats: 'إحصائياتي', chooseCourse: 'اختر الدورة', completionRate: 'نسبة الإنجاز',
+    daysAttended: 'أيام حضرتها', daysLeft: 'يوم متبقٍّ', endedLabel: 'انتهت',
+    courseEnd: 'تاريخ انتهاء الدورة', endRequired: 'اختر تاريخ انتهاء الدورة أولًا',
   },
   en: {
     brand: 'Itqan', dir: 'ltr',
@@ -75,7 +79,11 @@ const STR = {
     // delete course + attendance
     deleteClass: 'Delete course', confirmDelete: 'Delete this course permanently? Everything in it will be removed.', deleted: 'Deleted',
     attendance: 'Attendance', sessionDate: 'Session date', present: 'Present', absent: 'Absent', attRate: 'Attendance rate',
+    noAttendanceYet: 'No attendance recorded yet', absRate: 'Absence rate',
     confirm: 'Confirm', cancel: 'Cancel',
+    myStats: 'My stats', chooseCourse: 'Choose course', completionRate: 'Completion',
+    daysAttended: 'Days attended', daysLeft: 'Days left', endedLabel: 'Ended',
+    courseEnd: 'Course end date', endRequired: 'Pick a course end date first',
   },
 };
 

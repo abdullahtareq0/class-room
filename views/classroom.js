@@ -7,6 +7,7 @@ import { reroute, go } from '../js/router.js';
 
 const LOGO = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10 12 5 2 10l10 5 10-5Z"/><path d="M6 12v5c0 1 2.7 2.5 6 2.5s6-1.5 6-2.5v-5"/><path d="M22 10v5"/></svg>`;
 const I_HOME = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/></svg>`;
+const I_CHART = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 14l4-4 3 3 5-6"/></svg>`;
 import { getClassroom } from '../js/classrooms.js';
 import { listGoals, addGoal } from '../js/goals.js';
 import { listTasks, addTask, listCompletions, markDone, unmarkDone } from '../js/tasks.js';
@@ -15,7 +16,7 @@ import { taskProgress, studentProgress, classProgress } from '../js/progress.js'
 import { uploadSubmission, listSubmissions, signedUrl, fileExt, MAX_BYTES } from '../js/submissions.js';
 import { listMessages, sendMessage, encodeAttachment } from '../js/chat.js';
 import { subscribeToClassroom } from '../js/realtime.js';
-import { listAttendance, setAttendance } from '../js/attendance.js';
+import { listAttendance, setAttendance, studentAttendanceStats, studentAttendanceList } from '../js/attendance.js';
 
 let unsub = null; // teardown for the previous room's realtime channel
 
@@ -65,13 +66,14 @@ function renderShell(S) {
   const tabs = [
     ['goals', l.goals], ['tasks', l.tabTasks], ['people', l.people], ['files', l.files], ['chat', l.chat],
   ];
-  if (S.isTeacher) tabs.push(['attendance', l.attendance]); // الحضور — للمدرّب فقط
+  tabs.push(['attendance', l.attendance]); // الحضور — المدرّب يسجّل، المتدرّب يشوف حضوره
   mount(`
   <div class="dash">
     <aside class="dside">
       <div class="brand"><span class="logo">${LOGO}</span>${esc(l.brand)}</div>
       <nav class="dnav">
         <button data-nav="home">${I_HOME} ${esc(l.teacherDash)}</button>
+        ${!S.isTeacher ? `<button data-nav="stats">${I_CHART} ${esc(l.myStats)}</button>` : ''}
       </nav>
       <div class="foot">
         <div class="me">
@@ -118,6 +120,7 @@ function renderShell(S) {
   document.getElementById('themeBtn').onclick = () => { toggleTheme(); reroute(); };
   document.getElementById('langBtn').onclick = () => { toggleLang(); reroute(); };
   document.querySelector('[data-nav="home"]').onclick = () => go('#/dashboard');
+  const navStats = document.querySelector('[data-nav="stats"]'); if (navStats) navStats.onclick = () => go('#/stats');
   document.getElementById('back').onclick = () => go('#/dashboard');
   document.getElementById('code').onclick = () => {
     navigator.clipboard?.writeText(S.room.classroom_code); toast(l.codeCopied);
@@ -282,8 +285,9 @@ function peoplePanel(S) {
   });
 }
 
-/* ---------------- attendance (تحضير المتدرّبين — للمدرّب) ---------------- */
+/* ---------------- attendance (المدرّب يسجّل / المتدرّب يشوف) ---------------- */
 function attendancePanel(S) {
+  if (!S.isTeacher) return studentAttendancePanel(S);
   const l = t();
   if (!S.attDate) S.attDate = new Date().toISOString().slice(0, 10); // اليوم افتراضيًا
 
@@ -338,6 +342,38 @@ function attendancePanel(S) {
 
   document.getElementById('attDate').onchange = (e) => { S.attDate = e.target.value; paint(); };
   paint();
+}
+
+// عرض حضور المتدرّب (للقراءة فقط): نسبته + سجلّ كل جلسة حاضر/غائب
+async function studentAttendancePanel(S) {
+  const l = t();
+  setPanel(`<div class="panel att-wrap">
+    <div class="att-stats" id="sAttStats"></div>
+    <div id="sAttList" class="stack"></div>
+  </div>`);
+
+  let stats = { attended: 0, rate: 0 }, rows = [];
+  try {
+    [stats, rows] = await Promise.all([
+      studentAttendanceStats(S.id, S.profile.id),
+      studentAttendanceList(S.id, S.profile.id),
+    ]);
+  } catch (e) { toast(l.error, true); }
+
+  document.getElementById('sAttStats').innerHTML = `
+    <div class="att-stat rate"><div class="n">${stats.rate}%</div><div class="l">${esc(l.attRate)}</div></div>
+    <div class="att-stat no"><div class="n">${stats.absenceRate}%</div><div class="l">${esc(l.absRate)}</div></div>
+    <div class="att-stat ok"><div class="n">${stats.attended}</div><div class="l">${esc(l.daysAttended)}</div></div>`;
+
+  const list = document.getElementById('sAttList');
+  if (!rows.length) { list.innerHTML = `<div class="empty">${esc(l.noAttendanceYet)}</div>`; return; }
+  list.innerHTML = rows.map((r) => `
+    <div class="att-row">
+      <div class="row"><span class="pill code">${esc(r.session_date)}</span></div>
+      <span style="padding:6px 15px;border-radius:10px;font-weight:700;font-size:13px;color:#fff;background:${r.present ? 'var(--ok)' : 'var(--danger)'}">
+        ${r.present ? esc(l.present) : esc(l.absent)}
+      </span>
+    </div>`).join('');
 }
 
 /* ---------------- files / submissions (★ feature 12) ---------------- */

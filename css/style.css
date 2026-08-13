@@ -237,6 +237,17 @@ textarea { resize: vertical; min-height: 64px; }
 .cover .del { position: relative; z-index: 1; background: rgba(0,0,0,.28); border: 0; color: #fff; width: 30px; height: 30px;
   border-radius: 9px; display: grid; place-items: center; font-size: 14px; }
 .cover .del:hover { background: var(--danger); }
+
+/* درجات بترولية متقاربة + أيقونة الموضوع (بدل الحرف) */
+.cover.tone-1 { background: linear-gradient(140deg, #0E8B84, #0A5C43); }
+.cover.tone-2 { background: linear-gradient(140deg, #12938C, #0A5E57); }
+.cover.tone-3 { background: linear-gradient(140deg, #167C86, #0E4A52); }
+.cover.tone-4 { background: linear-gradient(140deg, #159B8C, #0A6A5F); }
+.cover.tone-5 { background: linear-gradient(140deg, #0E7E86, #0A4E58); }
+.cover.tone-6 { background: linear-gradient(140deg, #1B9E7F, #0D5E48); }
+.cover .topic { position: absolute; inset-inline-start: 12px; bottom: -14px; color: #fff; opacity: .18; z-index: 1; }
+.cover .topic svg { width: 78px; height: 78px; }
+
 .ccard .b { padding: 15px 16px 17px; display: flex; flex-direction: column; gap: 9px; flex: 1; }
 .ccard .b h3 { font-size: 17px; font-weight: 800; }
 .ccard .b p { color: var(--muted); font-size: 13px; }
@@ -264,6 +275,14 @@ textarea { resize: vertical; min-height: 64px; }
   .dmain { padding: 20px 16px 50px; }
   .att-stats { grid-template-columns: 1fr; }
 }
+
+/* ===== إحصائيات المتدرّب ===== */
+.my-course-stats { max-width: 900px; margin: 14px auto 0; padding: 0 22px; }
+.mystats { display: grid; grid-template-columns: repeat(auto-fit, minmax(148px, 1fr)); gap: 12px; margin-top: 14px; }
+.mystat { border: 1px solid var(--line); border-radius: 14px; padding: 15px 16px; background: var(--card); }
+.mystat .n { font-size: 24px; font-weight: 800; font-variant-numeric: tabular-nums; line-height: 1; color: var(--brand-dark); }
+.mystat .l { color: var(--muted); font-size: 12px; margin-top: 6px; }
+@media (max-width: 640px) { .mystats { grid-template-columns: 1fr 1fr; } }
 
 /* ===== نافذة تأكيد أنيقة ===== */
 .cdialog-backdrop { position: fixed; inset: 0; z-index: 200; display: grid; place-items: center; padding: 18px;
