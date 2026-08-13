@@ -70,14 +70,44 @@ export function subscribe(cb) {
 // ---------- notification bell (dropdown of latest announcements) ----------
 // Shows the latest few announcements; clicking any (or "view all") opens the
 // full announcements page where the complete details are shown.
+// unread tracking (per user, in localStorage) — reading an announcement clears it
+function readKey(uid) { return 'ann_read_' + uid; }
+function getRead(uid) {
+  try { return new Set(JSON.parse(localStorage.getItem(readKey(uid)) || '[]')); }
+  catch (_) { return new Set(); }
+}
+export function markRead(uid, id) {
+  const s = getRead(uid);
+  if (!s.has(id)) { s.add(id); localStorage.setItem(readKey(uid), JSON.stringify([...s])); }
+}
+export async function unreadCount(profile) {
+  try {
+    const list = await listForUser(profile);
+    const read = getRead(profile.id);
+    return list.filter((a) => !read.has(a.id)).length;
+  } catch (_) { return 0; }
+}
+
+// Shared bell button markup (students only) — used on every student view so the
+// icon stays consistent everywhere.
+export function bellHtml(profile) {
+  if (profile.role === 'teacher') return '';
+  const l = t();
+  return `<button class="icon-btn bell" id="bellBtn" title="${esc(l.announcements)}">${I_BELL}<span class="bell-badge" id="bellBadge" hidden></span></button>`;
+}
+
+function setBadge(n) {
+  const b = document.getElementById('bellBadge');
+  if (!b) return;
+  if (n > 0) { b.textContent = n > 99 ? '99+' : String(n); b.hidden = false; }
+  else { b.hidden = true; }
+}
+
 export function wireBell(profile) {
   const bell = document.getElementById('bellBtn');
   if (!bell) return;
 
-  countForUser(profile).then((n) => {
-    const b = document.getElementById('bellBadge');
-    if (b && n > 0) { b.textContent = n > 99 ? '99+' : String(n); b.hidden = false; }
-  });
+  unreadCount(profile).then(setBadge);
 
   let drop = null;
   const close = () => {
@@ -113,17 +143,23 @@ export function wireBell(profile) {
       const host = drop && drop.querySelector('#bellList');
       if (!host) return;
       const top = list.slice(0, 6);
+      const read = getRead(profile.id);
       host.innerHTML = top.length
         ? top.map((a) => `
-          <button class="bell-item" data-go="1">
+          <button class="bell-item ${read.has(a.id) ? '' : 'unread'}" data-id="${esc(a.id)}">
             <span class="ann-course">${esc(a.courseName)}</span>
             <div class="bell-item-title">${esc(a.title)}</div>
             ${a.body ? `<div class="bell-item-body">${esc(a.body)}</div>` : ''}
             <div class="ann-time">${esc(fmtDate(a.createdAt))}</div>
           </button>`).join('')
         : `<div class="empty" style="padding:26px 12px">${esc(l.noAnnouncements)}</div>`;
-      host.querySelectorAll('[data-go]').forEach((el) => {
-        el.onclick = () => { close(); go('#/announcements'); };
+      host.querySelectorAll('.bell-item').forEach((el) => {
+        el.onclick = () => {
+          markRead(profile.id, el.dataset.id);
+          unreadCount(profile).then(setBadge);
+          close();
+          go('#/announcements');
+        };
       });
     }).catch(() => {
       const host = drop && drop.querySelector('#bellList');
@@ -202,6 +238,7 @@ export async function renderAnnouncementsPage(profile) {
       <div class="dtop">
         <button class="btn ghost sm" id="back">${esc(l.back)} ↩</button>
         <div class="sp"></div>
+        ${bellHtml(profile)}
         <button class="icon-btn" id="langBtn" title="Language">${getLang() === 'ar' ? 'EN' : 'ع'}</button>
         <button class="icon-btn" id="themeBtn" title="Theme">${getTheme() === 'light' ? '🌙' : '☀️'}</button>
       </div>
@@ -218,6 +255,7 @@ export async function renderAnnouncementsPage(profile) {
   document.getElementById('themeBtn').onclick = () => { toggleTheme(); reroute(); };
   document.getElementById('langBtn').onclick = () => { toggleLang(); reroute(); };
   document.querySelector('[data-nav="home"]').onclick = () => go('#/dashboard');
+  wireBell(profile);
   const newBtn = document.getElementById('annNew');
   if (newBtn) newBtn.onclick = () => openAnnouncementDialog(profile, courses, { afterSave: renderList });
 

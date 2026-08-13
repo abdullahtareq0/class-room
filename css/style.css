@@ -310,7 +310,10 @@ textarea { resize: vertical; min-height: 64px; }
 .ann-card-body { color: var(--muted); font-size: 14px; margin-top: 6px; line-height: 1.7; white-space: pre-wrap; }
 
 /* notification bell */
+.icon-btn { display: inline-grid; place-items: center; }
+.icon-btn svg { width: 18px; height: 18px; display: block; }
 .icon-btn.bell { position: relative; }
+.bell-item.unread { background: color-mix(in srgb, var(--brand-tint) 55%, transparent); }
 .bell-badge { position: absolute; top: -5px; inset-inline-end: -5px; min-width: 17px; height: 17px; padding: 0 4px;
   background: var(--danger); color: #fff; border-radius: 999px; font-size: 10px; font-weight: 800;
   display: grid; place-items: center; line-height: 1; }
