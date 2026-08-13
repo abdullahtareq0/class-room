@@ -314,9 +314,8 @@ textarea { resize: vertical; min-height: 64px; }
 .icon-btn svg { width: 18px; height: 18px; display: block; }
 .icon-btn.bell { position: relative; }
 .bell-item.unread { background: color-mix(in srgb, var(--brand-tint) 55%, transparent); }
-.bell-badge { position: absolute; top: -5px; inset-inline-end: -5px; min-width: 17px; height: 17px; padding: 0 4px;
-  background: var(--danger); color: #fff; border-radius: 999px; font-size: 10px; font-weight: 800;
-  display: grid; place-items: center; line-height: 1; }
+.bell-dot { position: absolute; top: -1px; inset-inline-end: -1px; width: 10px; height: 10px;
+  background: var(--danger); border-radius: 50%; border: 2px solid var(--bg); }
 .bell-drop { position: fixed; z-index: 120; width: 320px; max-width: calc(100vw - 16px);
   background: var(--card); border: 1px solid var(--line); border-radius: 16px; box-shadow: var(--shadow);
   overflow: hidden; display: flex; flex-direction: column; max-height: 70vh; }

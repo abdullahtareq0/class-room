@@ -93,21 +93,25 @@ export async function unreadCount(profile) {
 export function bellHtml(profile) {
   if (profile.role === 'teacher') return '';
   const l = t();
-  return `<button class="icon-btn bell" id="bellBtn" title="${esc(l.announcements)}">${I_BELL}<span class="bell-badge" id="bellBadge" hidden></span></button>`;
+  return `<button class="icon-btn bell" id="bellBtn" title="${esc(l.announcements)}">${I_BELL}<span class="bell-dot" id="bellDot" hidden></span></button>`;
 }
 
-function setBadge(n) {
-  const b = document.getElementById('bellBadge');
-  if (!b) return;
-  if (n > 0) { b.textContent = n > 99 ? '99+' : String(n); b.hidden = false; }
-  else { b.hidden = true; }
+// A plain red dot (no number): visible when there is any unread announcement.
+function setDot(show) {
+  const d = document.getElementById('bellDot');
+  if (d) d.hidden = !show;
+}
+function refreshDot(profile) {
+  unreadCount(profile).then((n) => setDot(n > 0));
 }
 
-export function wireBell(profile) {
+// badge:false is passed on the announcements page itself (which clears the dot
+// on its own), so the shared wireBell doesn't re-show it.
+export function wireBell(profile, { badge = true } = {}) {
   const bell = document.getElementById('bellBtn');
   if (!bell) return;
 
-  unreadCount(profile).then(setBadge);
+  if (badge) refreshDot(profile);
 
   let drop = null;
   const close = () => {
@@ -156,7 +160,7 @@ export function wireBell(profile) {
       host.querySelectorAll('.bell-item').forEach((el) => {
         el.onclick = () => {
           markRead(profile.id, el.dataset.id);
-          unreadCount(profile).then(setBadge);
+          refreshDot(profile);
           close();
           go('#/announcements');
         };
@@ -255,7 +259,7 @@ export async function renderAnnouncementsPage(profile) {
   document.getElementById('themeBtn').onclick = () => { toggleTheme(); reroute(); };
   document.getElementById('langBtn').onclick = () => { toggleLang(); reroute(); };
   document.querySelector('[data-nav="home"]').onclick = () => go('#/dashboard');
-  wireBell(profile);
+  wireBell(profile, { badge: false });
   const newBtn = document.getElementById('annNew');
   if (newBtn) newBtn.onclick = () => openAnnouncementDialog(profile, courses, { afterSave: renderList });
 
@@ -265,9 +269,9 @@ export async function renderAnnouncementsPage(profile) {
     let list = [];
     try { list = await listForUser(profile); } catch (_) {}
     // being on this page means the user is seeing every announcement → mark them
-    // all read so the notification badge clears everywhere.
+    // all read so the notification dot clears everywhere.
     list.forEach((a) => markRead(profile.id, a.id));
-    setBadge(0);
+    setDot(false);
     host.innerHTML = list.length
       ? list.map((a) => `
         <div class="ann-card">
