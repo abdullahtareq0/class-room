@@ -7,6 +7,7 @@ import { listForStudent } from '../js/classrooms.js';
 import { studentAttendanceStats } from '../js/attendance.js';
 import { listTasks, listCompletions } from '../js/tasks.js';
 import { studentProgress } from '../js/progress.js';
+import { I_MEGA, bellHtml, wireBell } from '../js/announcements.js';
 
 const LOGO = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10 12 5 2 10l10 5 10-5Z"/><path d="M6 12v5c0 1 2.7 2.5 6 2.5s6-1.5 6-2.5v-5"/><path d="M22 10v5"/></svg>`;
 const I_HOME = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 22V12h6v10"/></svg>`;
@@ -24,6 +25,7 @@ export async function renderStats(profile) {
       <nav class="dnav">
         <button data-nav="home">${I_HOME} ${esc(l.teacherDash)}</button>
         <button class="on" data-nav="stats">${I_CHART} ${esc(l.myStats)}</button>
+        <button data-nav="ann">${I_MEGA} ${esc(l.announcements)}</button>
       </nav>
       <div class="foot">
         <div class="me">
@@ -38,6 +40,7 @@ export async function renderStats(profile) {
     <main class="dmain">
       <div class="dtop">
         <div class="sp"></div>
+        ${bellHtml(profile)}
         <button class="icon-btn" id="langBtn">${getLang() === 'ar' ? 'EN' : 'ع'}</button>
         <button class="icon-btn" id="themeBtn">${getTheme() === 'light' ? '🌙' : '☀️'}</button>
       </div>
@@ -55,8 +58,10 @@ export async function renderStats(profile) {
   document.getElementById('themeBtn').onclick = () => { toggleTheme(); reroute(); };
   document.getElementById('langBtn').onclick = () => { toggleLang(); reroute(); };
   document.querySelector('[data-nav="home"]').onclick = () => go('#/dashboard');
+  document.querySelector('[data-nav="ann"]').onclick = () => go('#/announcements');
+  wireBell(profile);
 
-  // بطاقة لكل دورة، تُملأ إحصائياتها بشكل مستقل
+  // بطاقة لكل دورة, تُملأ إحصائياتها بشكل مستقل
   const list = document.getElementById('statsList');
   for (const c of classes) {
     const card = document.createElement('div');
